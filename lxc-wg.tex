@@ -1,0 +1,138 @@
+\documentclass{beamer}
+\usepackage[english,russian]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{ulem}
+
+\mode<presentation>
+{
+    \usetheme{Warsaw}
+    \useoutertheme{miniframes}
+    \setbeamercovered{transparent}
+}
+
+\begin{document}
+
+\title{How Wargaming.net use LXC \\for staging environments}
+\author{Maksim 'max\_posedon' Melnikau}
+\institute{Linux Mobile hobbyist\\World of Tanks developer}
+\date{\today}
+\frame{\titlepage}
+
+\section{Overview}
+\frame{
+    \frametitle{LXC}
+    \begin{block}{Wikipedia}
+    LXC (Linux Containers) is an operating system-level virtualization 
+    method for running multiple isolated Linux systems (containers) 
+    on a single control host. LXC does not provide a virtual machine, 
+    but rather provides a virtual environment that has its own process and network space.
+    \\
+    LXC relies on the Linux kernel cgroups functionality that became 
+    available in version 2.6.29, developed as part of LXC. It also relies 
+    on other kinds of namespace-isolation functionality, which were 
+    developed and integrated into the mainline Linux kernel.
+    \end{block}
+}
+
+\frame{
+    \frametitle{Features}
+    \begin{itemize}
+    \item Lightweight - chroot on steroids
+    \item Mainline kernel - available everywhere
+    \item Can coexist with other virtualization technologies
+    \item Effective - only one kernel schedule resources
+    \end{itemize}
+}
+
+\section{Game Server staging}
+\frame{
+    \frametitle{Problems}
+    \begin{block}{Games}
+    \begin{itemize}
+    \item World of Tanks
+    \item World of Warplanes
+    \end{itemize}
+    \end{block}
+
+    \begin{block}{Multipling problems}
+    \begin{itemize}
+    \item About 10 instances for testers
+    \item Separate env for every server developer
+    \item Fast and easy deployment required
+    \item Deployment not automated
+    \end{itemize}
+    \end{block}
+}
+
+\frame{
+    \frametitle{Solution}
+    \begin{block}{Copy prepared container}
+    \begin{itemize}
+    \item Ubuntu Server 11.10 as host
+    \item Centos 5.7 as guest
+    \item All configs are ip and hostname agnostic
+    \item Pass mac-address and hostname from lxc config
+    \item Use office DNS/DHCP infrastructure
+    \item Bind rabbitmq's mnesia storage to localhost, not hostname
+    \item 2 network interfaces - external and internal
+    \end{itemize}
+    \end{block}
+}
+
+\section{WEB staging}
+\frame{
+    \frametitle{Problems}
+    \begin{block}{Projects}
+    \begin{itemize}
+    \item SPA - single point of authentication
+    \item Portal - game portal
+    \item Exporter - export data form server
+    \item CSIS - cluster state information service
+    \item Update Service - news and patches info for launcher
+    \item ...
+    \end{itemize}
+    \end{block}
+
+    \begin{block}{Multipling problems}
+    \begin{itemize}
+    \item Multiple games
+    \item Multiple regions
+    \item Stable/Trunk/Experimental
+    \end{itemize}
+    \end{block}
+}
+
+\frame{
+    \frametitle{Solution}
+    \begin{itemize}
+    \item Ubuntu Server 11.10 as host
+    \item CentOS 5.7 -> Ubuntu Server 11.10 as guest
+    \item Copy base CentOS container (OpenVZ's)
+    \item Separate lxc container per project instance
+    \item Use lxc template for installing Ubuntu
+    \item Use puppet for automatic preparing system
+    \item Use fabric for automatic deploying app
+    \item Separate management user "with crontab"
+    \end{itemize}
+}
+
+\section{}
+\frame{
+    \frametitle{Future Goals}
+    \begin{itemize}
+    \item Improve dencity of containers per hardware
+    \item Prepare "all in" virtualbox image
+    \end{itemize}
+}
+
+\frame{
+    \frametitle{Questions and Answers}
+    \begin{itemize}
+    \item email/jabber(xmpp): m\_melnikau@wargaming.net
+    \end{itemize}
+}
+
+\end{document}
+
